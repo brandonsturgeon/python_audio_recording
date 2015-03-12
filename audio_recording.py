@@ -49,23 +49,30 @@ class Main():
     return copy.deepcopy(data_all[_from:(_to + 1)])
 
   def record(self):
+    print ""
+    print "Initializing recording.."
     p = pyaudio.PyAudio()
     stream = p.open(format=self.FORMAT, channels=self.CHANNELS, rate=self.RATE, input=True, output=True, frames_per_buffer=self.CHUNK_SIZE)
+    print "Success!"
     data_all = array('h')
     starttime = time.time()
+
+    print "Recording..."
     while True:
       data_chunk = array('h', stream.read(self.CHUNK_SIZE))
       if byteorder == 'big':
         data_chunk.byteswap()
       data_all.extend(data_chunk)
       if time.time() > starttime+5:
+        print "Ending recording.."
         break
 
-
+    print "Processing recording.."
     sample_width = p.get_sample_size(self.FORMAT)
     stream.stop_stream()
     stream.close()
     p.terminate()
+    print "Finished processing!"
 
     # Uncomment these lines to trim/normalize recording
     #data_all = self.trim(data_all)  # we trim before normalize as threshhold applies to un-normalized wave (as well as is_silent() function)
@@ -74,14 +81,22 @@ class Main():
 
   # Uses the Record method to write a recording to a file
   def record_to_file(self, path):
+    print ""
     sample_width, data = self.record()
     data = pack('<' + ('h' * len(data)), *data)
 
+    print ""
+    print "Preparing to write recording to file.."
+    print "Opening file.."
     wave_file = wave.open(path, 'wb')
+    print "Setting audio properties.."
     wave_file.setnchannels(self.CHANNELS)
     wave_file.setsampwidth(sample_width)
     wave_file.setframerate(self.RATE)
+    print "Writing audio to file.."
     wave_file.writeframes(data)
+    print "Complete!"
+    print ""
     wave_file.close()
 
 if __name__ == "__main__":

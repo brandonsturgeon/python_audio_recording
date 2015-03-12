@@ -99,5 +99,7 @@ class Main():
     print ""
     wave_file.close()
 
+    print "Do stuff with recording.wav here."
+
 if __name__ == "__main__":
   Main()
